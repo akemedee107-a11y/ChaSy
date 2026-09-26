@@ -1,38 +1,21 @@
-const STORAGE_KEY = 'chasy-messages-v1';
+const DATABASE_URL = 'https://chasy-42ac3-default-rtdb.asia-southeast1.firebasedatabase.app';
 const NAME_KEY = 'chasy-display-name';
 const COLOR_CLASSES = ['pink', 'blue', 'amber'];
 
 const form = document.querySelector('#messageForm');
 const input = document.querySelector('#messageInput');
 const senderInput = document.querySelector('#senderInput');
+const sendButton = form.querySelector('button[type="submit"]');
 const messageList = document.querySelector('#messageList');
 const clearButton = document.querySelector('#clearButton');
 const emptyTemplate = document.querySelector('#emptyStateTemplate');
 const peopleList = document.querySelector('#peopleList');
 const peopleCount = document.querySelector('#peopleCount');
 const formMessage = document.querySelector('#formMessage');
+const connectionStatus = document.querySelector('#connectionStatus');
 
-let messages = loadMessages();
+let messages = [];
 senderInput.value = localStorage.getItem(NAME_KEY) || '';
-
-function loadMessages() {
-  try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    return Array.isArray(stored) ? stored : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveMessages() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-    return true;
-  } catch {
-    formMessage.textContent = 'ไม่สามารถบันทึกข้อความได้ กรุณาอนุญาต localStorage ใน browser';
-    return false;
-  }
-}
 
 function formatTime(value) {
   return new Intl.DateTimeFormat('th-TH', {
@@ -44,6 +27,15 @@ function formatTime(value) {
 function colorFor(name) {
   const value = [...name].reduce((sum, character) => sum + character.codePointAt(0), 0);
   return COLOR_CLASSES[value % COLOR_CLASSES.length];
+}
+
+function normalizeMessages(data) {
+  if (!data || typeof data !== 'object') return [];
+  return Object.entries(data)
+    .map(([id, item]) => ({ id, ...item }))
+    .filter((item) => item.sender && item.text && item.sentAt)
+    .sort((first, second) => first.sentAt - second.sentAt)
+    .slice(-100);
 }
 
 function renderPeople() {
@@ -96,7 +88,7 @@ function renderMessages() {
     const name = document.createElement('strong');
     name.textContent = item.sender;
     const time = document.createElement('time');
-    time.dateTime = item.sentAt;
+    time.dateTime = new Date(item.sentAt).toISOString();
     time.textContent = formatTime(item.sentAt);
     const text = document.createElement('p');
     text.textContent = item.text;
@@ -110,7 +102,39 @@ function renderMessages() {
   messageList.scrollTop = messageList.scrollHeight;
 }
 
-form.addEventListener('submit', (event) => {
+async function loadMessages() {
+  const response = await fetch(`${DATABASE_URL}/messages.json`);
+  if (!response.ok) throw new Error('Cannot read messages');
+  messages = normalizeMessages(await response.json());
+  renderMessages();
+}
+
+function connectRealtime() {
+  const stream = new EventSource(`${DATABASE_URL}/messages.json`);
+
+  stream.addEventListener('open', () => {
+    connectionStatus.textContent = 'ออนไลน์ — ข้อความอัปเดตแบบ real-time';
+    connectionStatus.classList.add('connected');
+  });
+
+  const refresh = async () => {
+    try {
+      await loadMessages();
+    } catch {
+      connectionStatus.textContent = 'เชื่อมต่อไม่ได้ กรุณารีเฟรชหน้า';
+      connectionStatus.classList.remove('connected');
+    }
+  };
+
+  stream.addEventListener('put', refresh);
+  stream.addEventListener('patch', refresh);
+  stream.addEventListener('error', () => {
+    connectionStatus.textContent = 'กำลังเชื่อมต่อใหม่...';
+    connectionStatus.classList.remove('connected');
+  });
+}
+
+form.addEventListener('submit', async (event) => {
   event.preventDefault();
   const text = input.value.trim();
   const sender = senderInput.value.trim();
@@ -126,23 +150,41 @@ form.addEventListener('submit', (event) => {
     return;
   }
 
-  try {
-    localStorage.setItem(NAME_KEY, sender);
-  } catch { /* The message can still be shown for this session. */ }
+  localStorage.setItem(NAME_KEY, sender);
+  sendButton.disabled = true;
+  formMessage.textContent = 'กำลังส่ง...';
+  formMessage.classList.remove('success');
 
-  messages.push({
-    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    sender,
-    text,
-    sentAt: new Date().toISOString(),
-  });
-  messages = messages.slice(-100);
-  saveMessages();
-  renderMessages();
-  formMessage.textContent = 'ส่งข้อความแล้ว';
-  formMessage.classList.add('success');
-  input.value = '';
-  input.focus();
+  try {
+    const response = await fetch(`${DATABASE_URL}/messages.json`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sender: sender.slice(0, 30),
+        text: text.slice(0, 300),
+        sentAt: { '.sv': 'timestamp' },
+      }),
+    });
+    if (!response.ok) throw new Error('Cannot send message');
+    input.value = '';
+    formMessage.textContent = 'ส่งข้อความแล้ว';
+    formMessage.classList.add('success');
+    input.focus();
+  } catch {
+    formMessage.textContent = 'ส่งไม่สำเร็จ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่';
+  } finally {
+    sendButton.disabled = false;
+  }
+});
+
+clearButton.addEventListener('click', async () => {
+  if (!messages.length || !window.confirm('ต้องการล้างข้อความทั้งหมดใช่ไหม?')) return;
+  try {
+    const response = await fetch(`${DATABASE_URL}/messages.json`, { method: 'DELETE' });
+    if (!response.ok) throw new Error('Cannot clear messages');
+  } catch {
+    formMessage.textContent = 'ล้างข้อความไม่สำเร็จ';
+  }
 });
 
 senderInput.addEventListener('input', () => {
@@ -155,18 +197,9 @@ input.addEventListener('input', () => {
   formMessage.classList.remove('success');
 });
 
-clearButton.addEventListener('click', () => {
-  if (!messages.length || !window.confirm('ต้องการล้างข้อความทั้งหมดใช่ไหม?')) return;
-  messages = [];
-  localStorage.removeItem(STORAGE_KEY);
-  renderMessages();
-});
-
-window.addEventListener('storage', (event) => {
-  if (event.key === STORAGE_KEY) {
-    messages = loadMessages();
-    renderMessages();
-  }
-});
-
-renderMessages();
+loadMessages()
+  .then(connectRealtime)
+  .catch(() => {
+    connectionStatus.textContent = 'เชื่อมต่อ Firebase ไม่สำเร็จ';
+    formMessage.textContent = 'กรุณาตรวจสอบ Firebase Database Rules';
+  });

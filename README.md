@@ -1,12 +1,12 @@
 # ChaSy
 
-ChaSy is a small chat-system workshop built with plain HTML, CSS, and JavaScript. Messages are stored in the browser with `localStorage`, so no backend, database, or API key is required.
+ChaSy is a small realtime chat-system workshop built with plain HTML, CSS, JavaScript, and Firebase Realtime Database.
 
 ## Features
 
 - Enter and remember your own display name
-- Store up to 100 messages locally
-- Synchronize messages between tabs in the same browser
+- Synchronize messages between browsers and devices in realtime
+- Keep the latest 100 messages visible in the room
 - Clear chat history
 - Responsive desktop and mobile layout
 - Ready for GitHub Pages
@@ -19,6 +19,6 @@ Open `index.html` directly, or run a static server:
 npx serve .
 ```
 
-## Limitation
+## Firebase
 
-This workshop version stores messages only on the current device. Different browsers or devices cannot chat with each other without adding a backend or realtime database.
+Messages are stored in Firebase Realtime Database. The display name is remembered locally in each browser.
