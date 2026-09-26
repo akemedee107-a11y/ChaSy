@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ChaSy customer support tickets">
+  <title>Customer Support — ChaSy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="support.css?v=1">
+</head>
+<body>
+  <main class="app-shell support-shell">
+    <aside class="sidebar">
+      <a class="brand" href="index.html"><span class="brand-mark">C</span><span>ChaSy</span></a>
+      <div class="workspace">
+        <span class="workspace-avatar">S</span>
+        <div><strong>Customer Support</strong><small>ระบบช่วยเหลือลูกค้า</small></div>
+      </div>
+
+      <nav aria-label="เมนูหลัก">
+        <p class="nav-label">เมนู</p>
+        <a class="channel channel-link" href="index.html"><span>#</span> general</a>
+        <button class="channel active" id="ticketListButton" type="button"><span>🎫</span> tickets</button>
+      </nav>
+
+      <div class="role-box">
+        <label for="roleSelect">โหมดทดลอง</label>
+        <select id="roleSelect">
+          <option value="customer">ลูกค้า</option>
+          <option value="agent">เจ้าหน้าที่</option>
+        </select>
+        <small>ยังไม่มีระบบ Login จึงสลับโหมดได้</small>
+      </div>
+      <p class="storage-note" id="supportConnection">กำลังเชื่อมต่อ Firebase...</p>
+    </aside>
+
+    <section class="support-panel">
+      <header class="support-header">
+        <div>
+          <p class="eyebrow">CHA SY SUPPORT</p>
+          <h1 id="pageTitle">รายการ Ticket</h1>
+        </div>
+        <button class="primary-button" id="newTicketButton" type="button">+ เปิด Ticket ใหม่</button>
+      </header>
+
+      <div class="support-content">
+        <section id="ticketListView">
+          <div class="filters">
+            <button class="filter active" data-filter="all" type="button">ทั้งหมด</button>
+            <button class="filter" data-filter="เปิดใหม่" type="button">เปิดใหม่</button>
+            <button class="filter" data-filter="กำลังดำเนินการ" type="button">กำลังดำเนินการ</button>
+            <button class="filter" data-filter="ปิดแล้ว" type="button">ปิดแล้ว</button>
+          </div>
+          <div class="ticket-list" id="ticketList"></div>
+        </section>
+
+        <section class="hidden" id="newTicketView">
+          <form class="ticket-form" id="ticketForm">
+            <div class="field-grid">
+              <label>ชื่อผู้แจ้ง<input id="customerName" maxlength="40" required placeholder="ชื่อของคุณ"></label>
+              <label>ประเภทปัญหา
+                <select id="category" required>
+                  <option value="ปัญหาการใช้งาน">ปัญหาการใช้งาน</option>
+                  <option value="แจ้งข้อผิดพลาด">แจ้งข้อผิดพลาด</option>
+                  <option value="ขอเพิ่มฟีเจอร์">ขอเพิ่มฟีเจอร์</option>
+                  <option value="อื่น ๆ">อื่น ๆ</option>
+                </select>
+              </label>
+            </div>
+            <label>หัวข้อปัญหา<input id="subject" maxlength="80" required placeholder="สรุปปัญหาสั้น ๆ"></label>
+            <label>รายละเอียด<textarea id="description" maxlength="1000" required rows="6" placeholder="อธิบายปัญหาที่พบ"></textarea></label>
+            <p class="form-message" id="ticketFormMessage" role="status"></p>
+            <div class="form-actions">
+              <button class="secondary-button" id="cancelTicketButton" type="button">ยกเลิก</button>
+              <button class="primary-button" type="submit">เปิด Ticket</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="hidden" id="ticketDetailView">
+          <button class="back-button" id="backButton" type="button">← กลับไปรายการ Ticket</button>
+          <article class="ticket-detail-card">
+            <div>
+              <span class="ticket-number" id="detailNumber"></span>
+              <h2 id="detailSubject"></h2>
+              <p id="detailMeta"></p>
+            </div>
+            <label class="status-control">สถานะ
+              <select id="statusSelect">
+                <option>เปิดใหม่</option>
+                <option>กำลังดำเนินการ</option>
+                <option>รอลูกค้าตอบ</option>
+                <option>ปิดแล้ว</option>
+              </select>
+            </label>
+          </article>
+          <div class="ticket-messages" id="ticketMessages"></div>
+          <form class="ticket-reply" id="replyForm">
+            <div class="reply-identity"><span>ตอบในชื่อ</span><input id="replyName" maxlength="40" required placeholder="ชื่อของคุณ"></div>
+            <div class="message-input-wrap">
+              <input id="replyInput" maxlength="500" required placeholder="พิมพ์ข้อความตอบกลับ...">
+              <button class="send-button" type="submit"><span>ส่ง</span></button>
+            </div>
+            <p class="form-message" id="replyMessage" role="status"></p>
+          </form>
+        </section>
+      </div>
+    </section>
+  </main>
+  <script src="support.js?v=1"></script>
+</body>
+</html>

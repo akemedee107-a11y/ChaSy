@@ -99,6 +99,7 @@ button { cursor: pointer; }
 }
 
 .channel {
+  display: block;
   width: 100%;
   padding: 10px 13px;
   color: #c7ccd6;
@@ -107,6 +108,8 @@ button { cursor: pointer; }
   border: 0;
   border-radius: 9px;
 }
+.channel-link { text-decoration: none; }
+.channel-link:hover { color: white; background: rgba(255,255,255,.08); }
 
 .channel span { margin-right: 9px; color: #858e9f; font-size: 19px; }
 .channel.active { color: white; background: var(--purple); }
