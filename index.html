@@ -34,10 +34,8 @@
       </nav>
 
       <section class="people" aria-labelledby="people-title">
-        <p class="nav-label" id="people-title">สมาชิก — 3</p>
-        <div class="person"><span class="avatar pink">ป</span><span class="status"></span>ปริม</div>
-        <div class="person"><span class="avatar blue">บ</span><span class="status"></span>บีม</div>
-        <div class="person"><span class="avatar amber">น</span><span class="status away"></span>นนท์</div>
+        <p class="nav-label" id="people-title">สมาชิก — <span id="peopleCount">0</span></p>
+        <div id="peopleList"></div>
       </section>
 
       <p class="storage-note">ข้อความถูกเก็บไว้ในอุปกรณ์นี้</p>
@@ -57,12 +55,8 @@
       <div class="messages" id="messageList" aria-live="polite"></div>
 
       <form class="composer" id="messageForm">
-        <label class="sender-label" for="senderSelect">ส่งในชื่อ</label>
-        <select id="senderSelect" aria-label="เลือกผู้ส่ง">
-          <option value="ปริม">ปริม</option>
-          <option value="บีม">บีม</option>
-          <option value="นนท์">นนท์</option>
-        </select>
+        <label class="sender-label" for="senderInput">ชื่อผู้ส่ง</label>
+        <input id="senderInput" maxlength="30" autocomplete="name" placeholder="กรอกชื่อของคุณ" aria-label="ชื่อผู้ส่ง" required>
         <div class="message-input-wrap">
           <input id="messageInput" maxlength="300" autocomplete="off" placeholder="ส่งข้อความถึง #general" aria-label="ข้อความ">
           <button class="send-button" type="submit" aria-label="ส่งข้อความ">

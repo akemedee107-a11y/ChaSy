@@ -4,7 +4,7 @@ ChaSy is a small chat-system workshop built with plain HTML, CSS, and JavaScript
 
 ## Features
 
-- Send messages as one of three demo members
+- Enter and remember your own display name
 - Store up to 100 messages locally
 - Synchronize messages between tabs in the same browser
 - Clear chat history

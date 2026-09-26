@@ -154,7 +154,8 @@ button { cursor: pointer; }
 
 .composer { padding: 14px 24px 22px; border-top: 1px solid var(--line); }
 .sender-label { margin-right: 7px; color: var(--muted); font-size: 11px; }
-#senderSelect { margin-bottom: 9px; padding: 3px 24px 3px 8px; color: var(--purple-dark); background: #f2f0ff; border: 0; border-radius: 6px; font-size: 11px; font-weight: 600; }
+#senderInput { width: min(220px, 60%); margin-bottom: 9px; padding: 5px 9px; color: var(--purple-dark); background: #f2f0ff; border: 1px solid transparent; border-radius: 6px; outline: 0; font-size: 11px; font-weight: 600; }
+#senderInput:focus { border-color: #aca1ed; background: white; }
 .message-input-wrap { display: flex; gap: 10px; padding: 7px 7px 7px 16px; background: var(--soft); border: 1px solid transparent; border-radius: 13px; transition: .2s; }
 .message-input-wrap:focus-within { background: white; border-color: #aca1ed; box-shadow: 0 0 0 3px #efedff; }
 #messageInput { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; }
