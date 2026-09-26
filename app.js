@@ -10,6 +10,7 @@ const clearButton = document.querySelector('#clearButton');
 const emptyTemplate = document.querySelector('#emptyStateTemplate');
 const peopleList = document.querySelector('#peopleList');
 const peopleCount = document.querySelector('#peopleCount');
+const formMessage = document.querySelector('#formMessage');
 
 let messages = loadMessages();
 senderInput.value = localStorage.getItem(NAME_KEY) || '';
@@ -24,7 +25,13 @@ function loadMessages() {
 }
 
 function saveMessages() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    return true;
+  } catch {
+    formMessage.textContent = 'ไม่สามารถบันทึกข้อความได้ กรุณาอนุญาต localStorage ใน browser';
+    return false;
+  }
 }
 
 function formatTime(value) {
@@ -107,15 +114,24 @@ form.addEventListener('submit', (event) => {
   event.preventDefault();
   const text = input.value.trim();
   const sender = senderInput.value.trim();
-  if (!text || !sender) {
-    if (!sender) senderInput.focus();
+
+  if (!sender) {
+    formMessage.textContent = 'กรุณากรอกชื่อผู้ส่งก่อน';
+    senderInput.focus();
+    return;
+  }
+  if (!text) {
+    formMessage.textContent = 'กรุณาพิมพ์ข้อความก่อนกดส่ง';
+    input.focus();
     return;
   }
 
-  localStorage.setItem(NAME_KEY, sender);
+  try {
+    localStorage.setItem(NAME_KEY, sender);
+  } catch { /* The message can still be shown for this session. */ }
 
   messages.push({
-    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
     sender,
     text,
     sentAt: new Date().toISOString(),
@@ -123,8 +139,20 @@ form.addEventListener('submit', (event) => {
   messages = messages.slice(-100);
   saveMessages();
   renderMessages();
+  formMessage.textContent = 'ส่งข้อความแล้ว';
+  formMessage.classList.add('success');
   input.value = '';
   input.focus();
+});
+
+senderInput.addEventListener('input', () => {
+  formMessage.textContent = '';
+  formMessage.classList.remove('success');
+});
+
+input.addEventListener('input', () => {
+  formMessage.textContent = '';
+  formMessage.classList.remove('success');
 });
 
 clearButton.addEventListener('click', () => {
